@@ -1,0 +1,1 @@
+URL="git:///home/brenson/Schreibtisch/mixed_mode/siemens/siemens-ct-ree-sdi/Entwicklung/u-boot"

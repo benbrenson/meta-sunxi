@@ -1,0 +1,1 @@
+overlays=sun8i-h3-i2c0.dtbo sun8i-h3-i2c1.dtbo sun8i-h3-i2c2.dtbo sun8i-h3-spi-mcp2515.dtbo sun8i-h3-sc16is760.dtbo

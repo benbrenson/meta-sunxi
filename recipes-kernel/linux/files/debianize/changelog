@@ -1,0 +1,11 @@
+=ST-source-=V (=D) unstable; urgency=low
+
+  * Added installation of device tree overlays to /boot partition in
+    image.mk file.
+
+ -- Benedikt Niedermayr <BenediktNidermayr@mixed-mode.de>  Mon, 29 May 2017 12:00:00
+
+
+Local variables:
+mode: debian-changelog
+End:
