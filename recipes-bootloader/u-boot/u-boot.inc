@@ -1,1 +1,1 @@
-URL="git:///home/brenson/Schreibtisch/mixed_mode/siemens/siemens-ct-ree-sdi/Entwicklung/u-boot"
+URL="git://https://${GITUSER}:${BOOTLOADER_PASSWD}@git.pixel-group.de/siemens-ct/Siemens_CT_REE-u-boot.git"

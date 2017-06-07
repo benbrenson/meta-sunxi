@@ -9,7 +9,7 @@ PROVIDES="linux-image"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-${PV}:"
 
-KERNEL_SRC = "git:///home/brenson/Schreibtisch/mixed_mode/siemens/siemens-ct-ree-sdi/Entwicklung/linux-stable;protocol=file"
+KERNEL_SRC = "git://https://${GITUSER}:${KERNEL_PASSWD}@git.pixel-group.de/siemens-ct/Siemens_CT_REE-kernel.git;protocol=file"
 SRCREV="40e9411858aecb066c414efd617b8e2d8434ab5d"
 BRANCH="linux-4.10.y"
 
