@@ -1,4 +1,5 @@
 Source: ##PACKAGE_BASE##
+Version: ##VERSION##
 Section: ##SECTION##
 Priority: ##PRIORITY##
 Maintainer: ##MAINTAINER##
