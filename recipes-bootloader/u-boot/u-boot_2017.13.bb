@@ -23,6 +23,14 @@ SRC_URI= " \
         file://boot.cmd \
         "
 
+# Note: The bootloader should be capable for reading the cmdline from
+# a cmdline.txt file.
+do_create_cmdline() {
+    [ -z ${KERNEL_CMDLINE} ] && bbfatal "\nNo Kernel cmdline specified. Please set KERNEL_CMDLINE variable."
+    echo ${KERNEL_CMDLINE} > ${S}/cmdline.txt
+}
+addtask do_create_cmdline after do_unpack before do_build
+
 do_install_append() {
     install -m 0755 ${S}/${BOOT_IMG} ${DEPLOY_DIR_BIN}/bootloader
 }
