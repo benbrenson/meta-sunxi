@@ -5,6 +5,7 @@
 * debhelper
 * dh-make
 * git-buildpackage
+* schroot
 
 ## Debianize packages
 The isar build system will create a full debian compatible distribution.
