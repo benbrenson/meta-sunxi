@@ -1,0 +1,12 @@
+Source: ##PACKAGE_BASE##
+Version: ##VERSION##
+Section: ##SECTION##
+Priority: ##PRIORITY##
+Maintainer: ##MAINTAINER##
+Build-Depends: debhelper (>=9), ##DEPENDS##
+Standards-Version: 3.9.6
+Homepage: ##URL##
+
+Package: ##PACKAGE##
+Architecture: ##DEB_ARCH##
+Description: ##DESCRIPTION##
