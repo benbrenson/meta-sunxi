@@ -5,8 +5,6 @@ Customized for running with CactusPot board extension."
 inherit dpkg-cross kernel debianize
 DEPENDS += "dtc"
 
-PROVIDES="linux-image"
-
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-${PV}:"
 
 URL = "https://${GITUSER}:${KERNEL_PASSWD}@git.pixel-group.de/siemens-ct/Siemens_CT_REE-kernel.git"
