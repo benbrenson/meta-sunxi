@@ -32,8 +32,7 @@ do_create_cmdline() {
 addtask do_create_cmdline after do_unpack before do_build
 
 do_install_append() {
-    install -m 0755 ${S}/${BOOT_IMG} ${DEPLOY_DIR_BIN}/bootloader
+    install -m 0755 ${S}/${BOOT_IMG} ${DEPLOY_DIR_IMAGE}
 }
-do_install[dirs] += "${DEPLOY_DIR_BIN}/bootloader"
-
+do_install[dirs] += "${DEPLOY_DIR_IMAGE}"
 
