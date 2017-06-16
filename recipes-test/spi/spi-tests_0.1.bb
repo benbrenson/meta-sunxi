@@ -3,7 +3,6 @@ LICENSE = "gpl2"
 
 inherit dpkg debianize
 
-
 URL="local"
 SECTION  = "admin"
 PRIORITY = "standard"
