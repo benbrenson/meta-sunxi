@@ -43,6 +43,7 @@ build:
 	@echo "Running build target."
 	$(MAKE) olddefconfig
 	$(MAKE) -j6 $(IMAGE) $(IMAGE_LOADADDR)
+	$(MAKE) modules
 	$(MAKE) $(dtbos)
 	$(MAKE) $(dtbs)
 
@@ -66,6 +67,8 @@ install: build
 	mkdir -p debian/$(package)
 	mkdir -p $(dtb_install_dir)
 	mkdir -p $(dtbo_install_dir)
+
+	$(MAKE) modules_install INSTALL_MOD_PATH=debian/$(package)/lib
 
 	install -m 0644 arch/$(ARCH)/boot/$(IMAGE) debian/$(package)/boot/$(IMAGE)
 	install -m 0644 $(dtbs_dir) $(dtb_install_dir)
