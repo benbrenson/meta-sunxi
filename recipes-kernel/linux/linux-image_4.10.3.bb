@@ -7,13 +7,12 @@ DEPENDS += "dtc"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-${PV}:"
 
-URL = "https://${GITUSER}:${KERNEL_PASSWD}@git.pixel-group.de/siemens-ct/Siemens_CT_REE-kernel.git"
-KERNEL_SRC = "git://${URL};protocol=file"
+URL = "git://git.pixel-group.de/siemens-ct/Siemens_CT_REE-kernel.git"
 SRCREV = "40e9411858aecb066c414efd617b8e2d8434ab5d"
 BRANCH = "linux-4.10.y"
 
 SRC_URI += " \
-        ${KERNEL_SRC};branch=${BRANCH} \
+        ${URL};protocol=https;branch=${BRANCH} \
         file://defconfig \
         file://0001-Added-support-for-ixxat-usb-to-can-v2-compact.patch \
         file://dts \

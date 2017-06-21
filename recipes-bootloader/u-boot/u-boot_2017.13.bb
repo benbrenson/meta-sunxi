@@ -5,7 +5,6 @@ LICENSE = "gpl2"
 include u-boot.inc
 inherit dpkg-cross debianize
 
-BOOTLOADER_SRC = "${URL};protocol=file"
 SRCREV = "08933c6b2fbdc8e07f3f158dba4a2644bbae0b5e"
 BRANCH = "h3_siemens"
 
@@ -16,7 +15,7 @@ BOOTSCRIPT ?= "boot.scr"
 
 SRC_DIR="git"
 SRC_URI= " \
-        ${BOOTLOADER_SRC};branch=${BRANCH} \
+        ${URL};protocol=https;branch=${BRANCH} \
         file://defconfig \
         file://debian \
         file://overlays.txt \
@@ -27,7 +26,7 @@ SRC_URI= " \
 # a cmdline.txt file.
 do_create_cmdline() {
     [ -z ${KERNEL_CMDLINE} ] && bbfatal "\nNo Kernel cmdline specified. Please set KERNEL_CMDLINE variable."
-    echo ${KERNEL_CMDLINE} > ${S}/cmdline.txt
+    echo "${KERNEL_CMDLINE}" > ${S}/cmdline.txt
 }
 addtask do_create_cmdline after do_unpack before do_build
 
