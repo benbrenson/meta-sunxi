@@ -28,6 +28,7 @@ build:
 	cp ../defconfig .config
 	$(MAKE) olddefconfig
 	$(MAKE) -j4 all
+	./tools/mkimage -C none -A arm -T script -d ../boot.cmd boot.scr
 
 clean:
 	@echo "Running clean target."
@@ -48,8 +49,9 @@ install: build
 	dh_clean  -k
 
 	install -d debian/$(package)/boot
-	install -m 0755 $(srcdir)/u-boot-sunxi-with-spl.bin debian/$(package)/boot/u-boot-sunxi-with-spl.bin
-	install -m 0755 $(srcdir)/cmdline.txt debian/$(package)/boot/cmdline.txt
+	install -m 0064 $(srcdir)/u-boot-sunxi-with-spl.bin debian/$(package)/boot/u-boot-sunxi-with-spl.bin
+	install -m 0644 $(srcdir)/cmdline.txt debian/$(package)/boot/cmdline.txt
+	install -m 0644 boot.scr debian/$(package)/boot/boot.scr
 
 binary-arch: build install
 	@echo "Running binary-arch target."
