@@ -5,7 +5,7 @@ LICENSE = "gpl2"
 include u-boot.inc
 inherit dpkg-cross debianize
 
-SRCREV = "08933c6b2fbdc8e07f3f158dba4a2644bbae0b5e"
+SRCREV = "${BRANCH}"
 BRANCH = "h3_siemens"
 
 SECTION  = "admin"

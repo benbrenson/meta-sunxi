@@ -8,7 +8,7 @@ DEPENDS += "dtc"
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-${PV}:"
 
 URL = "git://git.pixel-group.de/siemens-ct/Siemens_CT_REE-kernel.git"
-SRCREV = "40e9411858aecb066c414efd617b8e2d8434ab5d"
+SRCREV = "${BRANCH}"
 BRANCH = "linux-4.10.y"
 
 SRC_URI += " \
