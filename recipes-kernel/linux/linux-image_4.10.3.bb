@@ -43,4 +43,11 @@ do_compile_overlays() {
         ${MAKE} ${dtbo}
     done
 }
-addtask do_compile_overlays after do_install_dtb before do_build
+addtask do_compile_overlays after do_update_dtc before do_install_overlays
+
+# for now only install overlays.txt file
+do_install_overlays() {
+    echo "overlays=${DTBOS}" | xargs > ${S}/debian/${PN}/boot/overlays.txt
+}
+do_install_overlays[dirs] += "${S}/debian/${PN}/boot"
+addtask do_install_overlays after do_compile_overlays before do_build

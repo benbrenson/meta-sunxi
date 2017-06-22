@@ -49,8 +49,7 @@ build:
 
 clean:
 	@echo "Running clean target."
-	#$(MAKE) mrproper
-	rm -rf debian/$(package)/*
+
 
 build-arch:
 	@echo "Running build-arch target."
@@ -62,7 +61,6 @@ install: build
 	@echo "Running install target."
 	dh_testdir
 	dh_testroot
-	dh_clean  -k
 
 	mkdir -p debian/$(package)
 	mkdir -p $(dtb_install_dir)
