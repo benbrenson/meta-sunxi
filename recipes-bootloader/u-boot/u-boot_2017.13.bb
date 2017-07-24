@@ -3,7 +3,7 @@ but does not flash it to the bootmedia. This has to be done separately."
 LICENSE = "gpl2"
 
 include u-boot.inc
-inherit dpkg-cross debianize
+inherit dpkg-cross debianize u-boot
 
 SRCREV = "${BRANCH}"
 BRANCH = "h3_siemens"
@@ -11,7 +11,11 @@ BRANCH = "h3_siemens"
 SECTION  = "admin"
 PRIORITY = "extra"
 
+BOOTSCRIPT_SRC ?= "boot.cmd"
 BOOTSCRIPT ?= "boot.scr"
+
+# Activate generating debian rules file
+GENERATE_RULES = "true"
 
 SRC_DIR="git"
 SRC_URI= " \
@@ -34,4 +38,3 @@ do_install_append() {
     install -m 0755 ${S}/${BOOT_IMG} ${DEPLOY_DIR_IMAGE}
 }
 do_install[dirs] += "${DEPLOY_DIR_IMAGE}"
-
