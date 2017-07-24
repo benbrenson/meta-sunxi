@@ -11,6 +11,10 @@ URL = "git://git.pixel-group.de/siemens-ct/Siemens_CT_REE-kernel.git"
 SRCREV = "${BRANCH}"
 BRANCH = "linux-4.10.y"
 
+# Activate generating debian rules file
+GENERATE_RULES = "true"
+
+SRC_DIR = "git"
 SRC_URI += " \
         ${URL};protocol=https;branch=${BRANCH} \
         file://defconfig \
@@ -19,11 +23,9 @@ SRC_URI += " \
         file://debian \
         "
 
-export DTBO_SRC_DIR ?= "arch/${CCARCH}/boot/dts/overlays"
+export DTBO_SRC_DIR ?= "arch/${TARGET_ARCH}/boot/dts/overlays"
 export DTBOS        ?= ""
-
-export DTBO_INSTALL_DIR_BASE ?= "boot"
-export DTBO_INSTALL_DIR ?= "${DTB_INSTALL_DIR_BASE}/dts/overlays"
+export DTBO_DEST_DIR ?= "boot/dts/overlays"
 
 # Overwrite the standart dtc with the overlay capable one.
 do_update_dtc() {
