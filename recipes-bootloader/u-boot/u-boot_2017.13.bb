@@ -18,13 +18,13 @@ BOOTSCRIPT ?= "boot.scr"
 GENERATE_RULES = "true"
 
 SRC_DIR="git"
-SRC_URI= " \
-        ${URL};protocol=https;branch=${BRANCH} \
-        file://defconfig \
-        file://debian \
-        file://overlays.txt \
-        file://boot.cmd \
-        "
+SRC_URI += " \
+         ${URL};protocol=https;branch=${BRANCH} \
+         file://defconfig \
+         file://debian \
+         file://overlays.txt \
+         file://boot.cmd \
+         "
 
 # Note: The bootloader should be capable for reading the cmdline from
 # a cmdline.txt file.
@@ -36,5 +36,6 @@ addtask do_create_cmdline after do_unpack before do_build
 
 do_install_append() {
     install -m 0755 ${S}/${BOOT_IMG} ${DEPLOY_DIR_IMAGE}
+    install -m 0755 ${S}/${BOOTSCRIPT} ${DEPLOY_DIR_IMAGE}
 }
 do_install[dirs] += "${DEPLOY_DIR_IMAGE}"

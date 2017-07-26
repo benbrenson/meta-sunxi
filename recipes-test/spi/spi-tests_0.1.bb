@@ -9,7 +9,7 @@ PRIORITY = "standard"
 
 SRC_DIR="src"
 
-SRC_URI= " \
+SRC_URI += " \
         file://src \
         file://debian \
         "
