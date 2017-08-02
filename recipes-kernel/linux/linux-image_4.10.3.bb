@@ -11,8 +11,6 @@ URL = "git://git.pixel-group.de/siemens-ct/Siemens_CT_REE-kernel.git"
 SRCREV = "${BRANCH}"
 BRANCH = "linux-4.10.y"
 
-# Activate generating debian rules file
-GENERATE_RULES = "true"
 
 SRC_DIR = "git"
 SRC_URI += " \
@@ -23,28 +21,34 @@ SRC_URI += " \
         file://debian \
         "
 
-export DTBO_SRC_DIR ?= "arch/${TARGET_ARCH}/boot/dts/overlays"
-export DTBOS        ?= ""
-export DTBO_DEST_DIR ?= "boot/dts/overlays"
+DTBO_SRC_DIR  ?= "arch/${TARGET_ARCH}/boot/dts/overlays"
+DTBOS         ?= ""
+DTBO_DEST_DIR ?= "boot/dts/overlays"
 
 # Overwrite the standart dtc with the overlay capable one.
 do_update_dtc() {
-    cd ${S}
+    cd ${PPS}
 
     # We need to compile the standart dtc first, since copying the modified dtc
     # is not enough. The dtc otherwise will be recompiled again.
     ${MAKE} scripts
-    cp ${TOOLSDIR_NATIVE}/dtc/dtc ${S}/scripts/dtc
+    cp /opt/bin/overlay-dtc ${PPS}/scripts/dtc/dtc
 }
 do_update_dtc[depends] = "dtc:do_install"
+do_update_dtc[chroot] = "1"
+do_update_dtc[id] = "${CROSS_BUILDCHROOT_ID}"
 addtask do_update_dtc after do_copy_device_tree before do_compile_overlays
 
+
 do_compile_overlays() {
-    cd ${S}
+    cd ${PPS}
     for dtbo in ${DTBOS}; do
         ${MAKE} ${dtbo}
     done
 }
+do_compile_overlays[chroot] = "1"
+do_compile_overlays[id] = "${CROSS_BUILDCHROOT_ID}"
+do_compile_overlays[stamp-extra-info] = "${MACHINE}.chroot"
 addtask do_compile_overlays after do_update_dtc before do_install_overlays
 
 # for now only install overlays.txt file

@@ -5,6 +5,10 @@ LICENSE = "gpl2"
 include u-boot.inc
 inherit dpkg-cross debianize u-boot
 
+# Add build dependencies installed via apt-get
+# to debian control file
+DEB_DEPENDS += "device-tree-compiler"
+
 SRCREV = "${BRANCH}"
 BRANCH = "h3_siemens"
 
@@ -14,8 +18,6 @@ PRIORITY = "extra"
 BOOTSCRIPT_SRC ?= "boot.cmd"
 BOOTSCRIPT ?= "boot.scr"
 
-# Activate generating debian rules file
-GENERATE_RULES = "true"
 
 SRC_DIR="git"
 SRC_URI += " \
