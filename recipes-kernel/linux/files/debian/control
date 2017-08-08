@@ -3,7 +3,7 @@ Version: ##VERSION##
 Section: ##SECTION##
 Priority: ##PRIORITY##
 Maintainer: ##MAINTAINER##
-Build-Depends: debhelper (>=9), ##DEPENDS##
+Build-Depends: ##DEPENDS##
 Standards-Version: 3.9.6
 Homepage: ##URL##
 
