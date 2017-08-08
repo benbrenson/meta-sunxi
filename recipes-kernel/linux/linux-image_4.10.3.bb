@@ -2,8 +2,8 @@ DESCRIPTION = "Mainline linux kernel support for the nanopi-neo. \
 Customized for running with CactusPot board extension."
 
 # We will cross compile the kernel, because qemu has poor performance.
-inherit dpkg-cross kernel debianize
-DEPENDS += "dtc"
+inherit kernel debianize
+DEPENDS_class-cross += "dtc-native"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-${PV}:"
 
@@ -53,7 +53,10 @@ addtask do_compile_overlays after do_update_dtc before do_install_overlays
 
 # for now only install overlays.txt file
 do_install_overlays() {
-    echo "overlays=${DTBOS}" | xargs > ${S}/debian/${PN}/boot/overlays.txt
+    echo "overlays=${DTBOS}" | xargs > ${S}/debian/${BPN}/boot/overlays.txt
 }
-do_install_overlays[dirs] += "${S}/debian/${PN}/boot"
+do_install_overlays[dirs] += "${S}/debian/${BPN}/boot"
 addtask do_install_overlays after do_compile_overlays before do_build
+
+
+BBCLASSEXTEND = "cross"
