@@ -3,11 +3,11 @@ but does not flash it to the bootmedia. This has to be done separately."
 LICENSE = "gpl2"
 
 include u-boot.inc
-inherit dpkg-cross debianize u-boot
+inherit dpkg debianize u-boot
 
 # Add build dependencies installed via apt-get
 # to debian control file
-DEB_DEPENDS += "device-tree-compiler"
+DEB_DEPENDS += " device-tree-compiler "
 
 SRCREV = "${BRANCH}"
 BRANCH = "h3_siemens"
@@ -41,3 +41,6 @@ do_install_append() {
     install -m 0755 ${S}/${BOOTSCRIPT} ${DEPLOY_DIR_IMAGE}
 }
 do_install[dirs] += "${DEPLOY_DIR_IMAGE}"
+
+
+BBCLASSEXTEND = "cross"
