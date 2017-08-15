@@ -1,0 +1,94 @@
+/dts-v1/ /plugin/;
+
+#include <dt-bindings/interrupt-controller/irq.h>
+
+/ {
+	compatible = "allwinner,sun8i-h3";
+
+	fragment@0 {
+		target-path = "/aliases";
+		__overlay__ {
+			i2c0 = "/soc/i2c@01c2ac00";
+		};
+	};
+
+	fragment@1 {
+		target = <&pio>;
+		__overlay__ {
+			sc16is_pin_irq: sc16is_pin_irq {
+				pins = "PA6"; 				/* PA6 Connected to Cactus Pot EXPANDER-INT */
+				function = "irq";
+				bias-pull-up;
+			};
+		};
+	};
+
+	fragment@2 {
+		target-path = "/clocks";
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <1>;
+			sc16is760_osc_fixed: sc16is760_osc_fixed {
+				compatible = "fixed-clock";
+				#clock-cells = <0>;
+				clock-frequency  = <1845000>;
+			};
+		};
+	};
+
+	fragment@3 {
+		target = <&i2c0>;
+		__overlay__ {
+
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "okay";
+
+			expander1: sc16is760@48 {
+				compatible = "nxp,sc16is760";
+				reg = <0x48>;
+				interrupt-parent = <&pio>;
+				interrupts = <0 6 IRQ_TYPE_EDGE_FALLING>; /* PA6 Connected to Cactus Pot CAN-INT */
+				clocks = <&sc16is760_osc_fixed>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				status = "okay";
+				
+			};
+
+			expander2: sc16is760@49 {
+				compatible = "nxp,sc16is760";
+				reg = <0x49>;
+				interrupt-parent = <&pio>;
+				interrupts = <0 6 IRQ_TYPE_EDGE_FALLING>; /* PA6 Connected to Cactus Pot CAN-INT */
+				clocks = <&sc16is760_osc_fixed>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				status = "okay";
+			};
+
+			expander3: sc16is760@4c {
+				compatible = "nxp,sc16is760";
+				reg = <0x4c>;
+				interrupt-parent = <&pio>;
+				interrupts = <0 6 IRQ_TYPE_EDGE_FALLING>; /* PA6 Connected to Cactus Pot CAN-INT */
+				clocks = <&sc16is760_osc_fixed>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				status = "okay";
+			};
+
+			expander4: sc16is760@4d {
+				compatible = "nxp,sc16is760";
+				reg = <0x4d>;
+				interrupt-parent = <&pio>;
+				interrupts = <0 6 IRQ_TYPE_EDGE_FALLING>; /* PA6 Connected to Cactus Pot CAN-INT */
+				clocks = <&sc16is760_osc_fixed>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				status = "okay";
+			};
+			
+		};
+	};
+};

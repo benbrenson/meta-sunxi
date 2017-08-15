@@ -25,16 +25,26 @@ SRC_URI += " \
          file://defconfig \
          file://debian \
          file://overlays.txt \
-         file://boot.cmd \
+         file://${BOOTSCRIPT_SRC} \
          "
 
-# Note: The bootloader should be capable for reading the cmdline from
-# a cmdline.txt file.
-do_create_cmdline() {
+
+BOOT="${EXTRACTDIR}/${BOOTSCRIPT_SRC}"
+do_configure() {
     [ -z ${KERNEL_CMDLINE} ] && bbfatal "\nNo Kernel cmdline specified. Please set KERNEL_CMDLINE variable."
-    echo "${KERNEL_CMDLINE}" > ${S}/cmdline.txt
+    #echo "${KERNEL_CMDLINE}" > ${S}/cmdline.txt
+    set -x
+    sed -i -e 's|##BOOT_DEVICE_NUM##|${BOOT_DEVICE_NUM}|g'   ${BOOT}
+    sed -i -e 's|##BOOT_DEVICE_NAME##|${BOOT_DEVICE_NAME}|g' ${BOOT}
+    sed -i -e 's|##BOOTP_PRIM_NUM##|${BOOTP_PRIM_NUM}|g'     ${BOOT}
+    sed -i -e 's|##BOOTP_SEC_NUM##|${BOOTP_SEC_NUM}|g'       ${BOOT}
+    sed -i -e 's|##ROOTDEV_PRIM##|${ROOTDEV_PRIM}|g'         ${BOOT}
+    sed -i -e 's|##ROOTDEV_SEC##|${ROOTDEV_SEC}|g'           ${BOOT}
+    sed -i -e 's|##KERNEL_CMDLINE##|${KERNEL_CMDLINE}|g'     ${BOOT}
+    sed -i -e 's|##DTBS##|${DTBS}|g'                         ${BOOT}
+
 }
-addtask do_create_cmdline after do_unpack before do_build
+addtask do_configure after do_unpack before do_build
 
 do_pre_install_append() {
     install -m 0755 ${S}/${BOOT_IMG} ${DEPLOY_DIR_IMAGE}
