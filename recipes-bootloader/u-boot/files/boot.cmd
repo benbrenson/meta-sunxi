@@ -5,8 +5,11 @@ setenv dtbo_addr "0x44000000"
 if printenv ustate; then
     if test ${ustate} = 0; then
         # Normal operation... do nothing special.
+        echo "Normal boot. No update was performed."
 
     elif test ${ustate} = 1; then
+        echo "Update was performed. Switching rootfs partitions."
+
         # Switch rootfs partitions and boot partitions
         setenv rootdevice ${rootdevice_sec}
         setenv rootdevice_sec ${rootdevice_prim}
@@ -16,18 +19,25 @@ if printenv ustate; then
         # Update was performed set ustate 2 so only rootfs will set it
         # to 0 again.
         setenv ustate 2
+        saveenv
 
     elif test ${ustate} = 2; then
         # Oh, oh... something went wrong.
         # Rootfs service did not reset the ustate.
         # So switch rootfs partitions and set ustate to 3, so
         # userspace will handle this case.
+
+        echo "Something went wrong while performing the update. Switching rootfs partitions back."
         setenv rootdevice ${rootdevice_sec}
         setenv rootdevice_sec ${rootdevice_prim}
         setenv rootdevice_prim ${rootdevice}
 
         setenv bootargs ${bootargs_base} root=${rootdevice}
         setenv ustate 3
+        saveenv
+
+    else
+        echo "ustate has an abnormal value. Please check this!"
     fi
 
 else
