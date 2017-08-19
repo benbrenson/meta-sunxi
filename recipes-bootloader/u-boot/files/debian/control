@@ -10,7 +10,7 @@ Homepage: ##URL##
 Package: ##PACKAGE##
 Architecture: ##DEB_ARCH##
 Description: ##DESCRIPTION##
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ##RDEPENDS##
 
 Package: libubootenv
 Architecture: ##DEB_ARCH##
