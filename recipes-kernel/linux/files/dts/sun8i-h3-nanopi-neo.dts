@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 James Pettigrew <james@innovum.com.au>
+ * Copyright (C) 2017 Mixed Mode GmbH <Benedikt.Niedermayr@mixed-mode.de>
  *
  * This file is dual-licensed: you can use it either under the terms
  * of the GPL or the X11 license, at your option. Note that this dual
@@ -46,3 +46,12 @@
     model = "FriendlyARM NanoPi NEO AIR";
     compatible = "friendlyarm,nanopi-neo", "allwinner,sun8i-h3";
 };
+
+ &emac {
+    phy-handle = <&int_mii_phy>;
+    phy-mode = "mii";
+    allwinner,leds-active-low;
+    mac-address = [ 9e 0b 74 f7 5e 6a ];
+    status = "okay";
+};
+

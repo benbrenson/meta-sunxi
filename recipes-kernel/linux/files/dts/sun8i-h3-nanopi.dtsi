@@ -89,16 +89,25 @@
 			gpios = <&r_pio 0 3 GPIO_ACTIVE_LOW>;
 		};
 	};
-
-	wifi_pwrseq: wifi_pwrseq {
-		compatible = "mmc-pwrseq-simple";
-		pinctrl-names = "default";
-		pinctrl-0 = <&wifi_en_nanopi_neo_air>;
-		reset-gpios = <&r_pio 0 7 GPIO_ACTIVE_LOW>; /* PL7 */
-	};
-
 };
 
+&ehci3 {
+	status = "okay";
+};
+
+&mmc0 {
+	bus-width = <4>;
+	cd-gpios = <&pio 5 6 GPIO_ACTIVE_HIGH>;
+	cd-inverted;
+	pinctrl-names = "default";
+	pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin>;
+	status = "okay";
+	vmmc-supply = <&reg_vcc3v3>;
+};
+
+&ohci3 {
+	status = "okay";
+};
 
 &pio {
 	leds_npi: led_pins@0 {
@@ -123,8 +132,6 @@
 	};
 };
 
-
-
 &r_pio {
 	leds_r_npi: led_pins@0 {
 		allwinner,pins = "PL10";
@@ -139,66 +146,7 @@
 		allwinner,drive = <SUN4I_PINCTRL_10_MA>;
 		allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
 	};
-
-
-	wifi_en_nanopi_neo_air: wifi_en_pin@0 {
-		allwinner,pins = "PL7";
-		allwinner,function = "gpio_out";
-		allwinner,drive = <SUN4I_PINCTRL_10_MA>;
-		allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
-		bias-disable;
-	};
-
 };
-
-
-&ehci3 {
-	status = "okay";
-};
-
-&mmc0 {
-	bus-width = <4>;
-	cd-gpios = <&pio 5 6 GPIO_ACTIVE_HIGH>;
-	cd-inverted;
-	pinctrl-names = "default";
-	pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin>;
-	status = "okay";
-	vmmc-supply = <&reg_vcc3v3>;
-};
-
-&mmc1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&mmc1_pins_a>;
-	vmmc-supply = <&reg_vcc3v3>;
-	vqmmc-supply = <&reg_vcc3v3>;
-	mmc-pwrseq = <&wifi_pwrseq>;
-	bus-width = <4>;
-	non-removable;
-	status = "okay";
-
-	brcmf: bcrmf@1 {
-		reg = <1>;
-		compatible = "brcm,bcm4329-fmac";
-		interrupt-parent = <&pio>;
-		interrupts = <6 10 IRQ_TYPE_LEVEL_LOW>; /* PG10 / EINT10 */
-		interrupt-names = "host-wake";
-	};
-};
-
-&mmc2 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&mmc2_8bit_pins>;
-	vmmc-supply = <&reg_vcc3v3>;
-	vqmmc-supply = <&reg_vcc3v3>;
-	bus-width = <8>;
-	non-removable;
-	status = "okay";
-};
-
-&ohci3 {
-	status = "okay";
-};
-
 
 &uart0 {
 	pinctrl-names = "default";
@@ -210,7 +158,7 @@
 	status = "okay";
 };
 
-
 &spi0{
-	cs-gpios =<0>, <0>, <0>, <0>, <&pio 6 9 1>, <&pio 0 1 1>;
+    cs-gpios =<0>, <0>, <0>, <0>, <&pio 6 9 1>, <&pio 0 1 1>;
 };
+

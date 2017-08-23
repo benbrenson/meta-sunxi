@@ -22,7 +22,7 @@ SRC_URI += " \
         ${URL};protocol=https;branch=${BRANCH} \
         file://${MACHINE}_defconfig \
         file://0001-Added-support-for-ixxat-usb-to-can-v2-compact.patch \
-        file://dts-${MACHINE} \
+        file://dts \
         file://debian \
         "
 
