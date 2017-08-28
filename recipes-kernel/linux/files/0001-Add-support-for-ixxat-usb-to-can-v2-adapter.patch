@@ -1,41 +1,30 @@
-From bb47588dff5f6354d18ef41fe7e73bd7335873cd Mon Sep 17 00:00:00 2001
-From: Benedikt Niedermayr <Benedikt.Niedermayr@mixed-mode.de>
-Date: Tue, 25 Apr 2017 15:02:36 +0200
-Subject: [PATCH] Added support for ixxat usb-to-can v2 compact.
+From 3daf59bc788e2a720ee7c126a666e4310376ac6f Mon Sep 17 00:00:00 2001
+From: Benedikt Niedermayr <benbrenson@gmx.de>
+Date: Sun, 27 Aug 2017 22:22:08 +0200
+Subject: [PATCH] Add support for ixxat usb to can v2 adapter.
 
-This driver was a little bit modified in order to run under 4.10 Kernel, because
-struct net_dev has changed a little bit:
-
--- netdev->trans_start = jiffies;
-++ //netdev->trans_start = jiffies;
-
-Unfortunatelly no usb timeouts where not generated anymore.
-
-Signed-off-by: Benedikt Niedermayr <Benedikt.Niedermayr@mixed-mode.de>
+Signed-off-by: Benedikt Niedermayr <benbrenson@gmx.de>
 ---
- drivers/net/can/usb/Makefile       |    6 +
+ drivers/net/can/usb/Makefile       |    3 +
  drivers/net/can/usb/ixx_usb_core.c |  878 +++++++++++++++++++++++
  drivers/net/can/usb/ixx_usb_core.h |  204 ++++++
  drivers/net/can/usb/ixx_usb_v2.c   | 1343 ++++++++++++++++++++++++++++++++++++
- 4 files changed, 2431 insertions(+)
+ 4 files changed, 2428 insertions(+)
  create mode 100644 drivers/net/can/usb/ixx_usb_core.c
  create mode 100644 drivers/net/can/usb/ixx_usb_core.h
  create mode 100644 drivers/net/can/usb/ixx_usb_v2.c
 
 diff --git a/drivers/net/can/usb/Makefile b/drivers/net/can/usb/Makefile
-index a64cf98..c1ce3fd 100644
+index 164453f..888db23 100644
 --- a/drivers/net/can/usb/Makefile
 +++ b/drivers/net/can/usb/Makefile
-@@ -8,3 +8,9 @@ obj-$(CONFIG_CAN_GS_USB) += gs_usb.o
- obj-$(CONFIG_CAN_KVASER_USB) += kvaser_usb.o
+@@ -9,3 +9,6 @@ obj-$(CONFIG_CAN_KVASER_USB) += kvaser_usb.o
  obj-$(CONFIG_CAN_PEAK_USB) += peak_usb/
  obj-$(CONFIG_CAN_8DEV_USB) += usb_8dev.o
+ obj-$(CONFIG_CAN_MCBA_USB) += mcba_usb.o
 +
-+# Siemenst-ct
-+# Build also ixxat usb-to-can module
-+obj-m += ixx_usb.o
-+ixx_usb-y = ixx_usb_v2.o ixx_usb_core.o
-+
+++obj-m += ixx_usb.o
+++ixx_usb-y = ixx_usb_v2.o ixx_usb_core.o
 diff --git a/drivers/net/can/usb/ixx_usb_core.c b/drivers/net/can/usb/ixx_usb_core.c
 new file mode 100644
 index 0000000..b1d38bb
@@ -2480,5 +2469,5 @@ index 0000000..8ac6981
 +	.dev_stop = ixx_usbv2_stop,
 +};
 -- 
-2.1.4
+2.7.4
 
