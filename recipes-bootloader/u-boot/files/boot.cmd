@@ -83,5 +83,9 @@ for overlay_file in ${overlays}; do
 	fi
 done
 
+# Activate watchdog (16 sec) for boot failure case
+echo Activating Watchdog, kernel must deactivate!
+wdt 16
+
 bootz ${kernel_addr_r} - ${fdt_addr_r} || bootm ${kernel_addr_r} - ${fdt_addr_r}
 
