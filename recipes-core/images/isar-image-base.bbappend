@@ -6,7 +6,7 @@ BOOTPART_FSTYPE = "vfat"
 
 # Post Rootfs: Add mmc to fstab
 do_post_fstab() {
-    echo "/dev/${BOOTPART}   /       ${BOOTPART_FSTYPE}        defaults        1   1" >> /etc/fstab
+    echo "/dev/${BOOTPART}   /boot       ${BOOTPART_FSTYPE}        defaults        1   1" >> /etc/fstab
 }
 addtask do_post_fstab
 do_post_fstab[stamp-extra-info] = "${MACHINE}.chroot"
