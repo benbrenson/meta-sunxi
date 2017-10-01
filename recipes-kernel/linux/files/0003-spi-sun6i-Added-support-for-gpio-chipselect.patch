@@ -1,0 +1,105 @@
+From 7eb8138be5ab941f8a907d40cdc4c77f10ae86b6 Mon Sep 17 00:00:00 2001
+From: Benedikt Niedermayr <benedikt.niedermayr@mixed-mode.de>
+Date: Wed, 10 May 2017 10:32:56 +0200
+Subject: [PATCH 3/5] spi-sun6i: Added support for gpio chipselect.
+
+---
+ drivers/spi/spi-sun6i.c | 49 ++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 48 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/spi/spi-sun6i.c b/drivers/spi/spi-sun6i.c
+index 03a773a..88663ff 100644
+--- a/drivers/spi/spi-sun6i.c
++++ b/drivers/spi/spi-sun6i.c
+@@ -21,6 +21,7 @@
+ #include <linux/platform_device.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/reset.h>
++#include <linux/gpio.h>
+ 
+ #include <linux/spi/spi.h>
+ 
+@@ -180,6 +181,13 @@ static void sun6i_spi_set_cs(struct spi_device *spi, bool enable)
+ 	struct sun6i_spi *sspi = spi_master_get_devdata(spi->master);
+ 	u32 reg;
+ 
++	if (spi->master->cs_gpios) {
++		if (gpio_is_valid(spi->master->cs_gpios[spi->chip_select])) {
++			gpio_set_value(spi->master->cs_gpios[spi->chip_select], enable);
++			return;
++		}
++	}
++
+ 	reg = sun6i_spi_read(sspi, SUN6I_TFR_CTL_REG);
+ 	reg &= ~SUN6I_TFR_CTL_CS_MASK;
+ 	reg |= SUN6I_TFR_CTL_CS(spi->chip_select);
+@@ -435,12 +443,32 @@ static int sun6i_spi_runtime_suspend(struct device *dev)
+ 	return 0;
+ }
+ 
++static int sun6i_spi_setup(struct spi_device *spi)
++{
++	int i;
++
++	if (!spi->master->cs_gpios) {
++		dev_info(&spi->dev, "No cs-gpio pin defined, using hardware cs.");
++		return 0;
++	}
++
++	for (i = 0; i < spi->master->num_chipselect; i++) {
++		if (!gpio_is_valid(spi->master->cs_gpios[i]))
++			continue;
++
++		gpio_direction_output(spi->master->cs_gpios[i],
++			spi->mode & SPI_CS_HIGH ? 0 : 1);
++	}
++
++	return 0;
++}
++
+ static int sun6i_spi_probe(struct platform_device *pdev)
+ {
+ 	struct spi_master *master;
+ 	struct sun6i_spi *sspi;
+ 	struct resource	*res;
+-	int ret = 0, irq;
++	int ret = 0, irq, i;
+ 
+ 	master = spi_alloc_master(&pdev->dev, sizeof(struct sun6i_spi));
+ 	if (!master) {
+@@ -485,6 +513,8 @@ static int sun6i_spi_probe(struct platform_device *pdev)
+ 	master->dev.of_node = pdev->dev.of_node;
+ 	master->auto_runtime_pm = true;
+ 	master->max_transfer_size = sun6i_spi_max_transfer_size;
++	master->flags |= SPI_MASTER_GPIO_SS;
++	master->setup = sun6i_spi_setup;
+ 
+ 	sspi->hclk = devm_clk_get(&pdev->dev, "ahb");
+ 	if (IS_ERR(sspi->hclk)) {
+@@ -528,6 +558,23 @@ static int sun6i_spi_probe(struct platform_device *pdev)
+ 		dev_err(&pdev->dev, "cannot register SPI master\n");
+ 		goto err_pm_disable;
+ 	}
++	
++	for (i = 0; i < master->num_chipselect; i++) {
++		if (!master->cs_gpios)
++			break;
++
++		if (!gpio_is_valid(master->cs_gpios[i]))
++			continue;
++
++		ret = devm_gpio_request(&pdev->dev, master->cs_gpios[i],
++				"spi_cs_gpio");
++
++		if (ret) {
++			dev_err(&pdev->dev, "Can't get CS GPIO %i\n",
++				master->cs_gpios[i]);
++			goto err_pm_disable;
++		}
++	}
+ 
+ 	return 0;
+ 
+-- 
+2.7.4
+

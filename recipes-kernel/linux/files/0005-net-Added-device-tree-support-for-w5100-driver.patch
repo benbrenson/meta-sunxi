@@ -1,0 +1,169 @@
+From aedc6808126cc308c30d31347d5aa328d54228b0 Mon Sep 17 00:00:00 2001
+From: Benedikt Niedermayr <Benedikt.Niedermayr@mixed-mode.de>
+Date: Tue, 20 Jun 2017 11:41:02 +0200
+Subject: [PATCH 5/5] net: Added device tree support for w5100 driver.
+
+Signed-off-by: Benedikt Niedermayr <Benedikt.Niedermayr@mixed-mode.de>
+---
+ .../devicetree/bindings/net/wiznet,w5100.txt       | 25 ++++++++
+ drivers/net/ethernet/wiznet/w5100-spi.c            | 75 ++++++++++++++--------
+ drivers/net/ethernet/wiznet/w5100.h                |  5 ++
+ 3 files changed, 80 insertions(+), 25 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/net/wiznet,w5100.txt
+
+diff --git a/Documentation/devicetree/bindings/net/wiznet,w5100.txt b/Documentation/devicetree/bindings/net/wiznet,w5100.txt
+new file mode 100644
+index 0000000..4a504cd
+--- /dev/null
++++ b/Documentation/devicetree/bindings/net/wiznet,w5100.txt
+@@ -0,0 +1,25 @@
++* Wiznet SPI to ethernet adapter (current support for w5100, w5200, w5500)
++
++Required properties:
++ - compatible: Should be one of the following:
++   - "wiznet,w5100" for w5100.
++   - "wiznet,w5200" for w5200.
++   - "wiznet,w5500" for w5500.
++ - reg: SPI chip select.
++ - interrupt-parent: The parent interrupt controller.
++ - interrupts: Should contain IRQ line for the ethernet controller.
++
++Optional properties:
++ - mac-address: Byte array containing the mac address.
++
++Example:
++    eth0: eth@0 {
++        compatible = "wiznet,w5500";
++        reg = <4>;
++        interrupt-parent = <&pio>;
++        pinctrl-0 = <&net0_pin_irq>;
++        interrupts = <0 2 IRQ_TYPE_LEVEL_LOW>;
++        mac-address = [ 9e 0b 74 f7 5e 6b ];
++        spi-max-frequency = <1000000>;
++        status = "okay";
++    };
+diff --git a/drivers/net/ethernet/wiznet/w5100-spi.c b/drivers/net/ethernet/wiznet/w5100-spi.c
+index 93a2d3c..f800079 100644
+--- a/drivers/net/ethernet/wiznet/w5100-spi.c
++++ b/drivers/net/ethernet/wiznet/w5100-spi.c
+@@ -17,6 +17,8 @@
+ #include <linux/netdevice.h>
+ #include <linux/of_net.h>
+ #include <linux/spi/spi.h>
++#include <linux/of.h>
++#include <linux/of_device.h>
+ 
+ #include "w5100.h"
+ 
+@@ -410,29 +412,60 @@ static const struct w5100_ops w5500_ops = {
+ 	.init = w5500_spi_init,
+ };
+ 
++static const struct w5100_platform_data w5100_info = {
++	.ops = &w5100_spi_ops,
++	.priv_size = 0,
++};
++
++static const struct w5100_platform_data w5200_info = {
++	.ops = &w5200_ops,
++	.priv_size = sizeof(struct w5200_spi_priv),
++};
++
++static const struct w5100_platform_data w5500_info = {
++	.ops = &w5500_ops,
++	.priv_size = sizeof(struct w5500_spi_priv),
++};
++
++
++static const struct of_device_id w5100_of_match[] = {
++	{
++		.compatible	= "wiznet,w5100",
++		.data		= (void *)&w5100_info,
++	},
++	{
++		.compatible	= "wiznet,w5200",
++		.data		= (void *)&w5200_info,
++	},
++	{
++		.compatible	= "wiznet,w5500",
++		.data		= (void *)&w5500_info,
++	},
++	{ }
++};
++MODULE_DEVICE_TABLE(of, w5100_of_match);
++
++static const struct spi_device_id w5100_spi_ids[] = {
++	{ "w5100", W5100 },
++	{ "w5200", W5200 },
++	{ "w5500", W5500 },
++	{}
++};
++MODULE_DEVICE_TABLE(spi, w5100_spi_ids);
++
+ static int w5100_spi_probe(struct spi_device *spi)
+ {
+-	const struct spi_device_id *id = spi_get_device_id(spi);
++	const struct of_device_id *of_id = of_match_device(w5100_of_match,
++							   &spi->dev);
+ 	const struct w5100_ops *ops;
++	const struct w5100_platform_data *pdata;
+ 	int priv_size;
+ 	const void *mac = of_get_mac_address(spi->dev.of_node);
+ 
+-	switch (id->driver_data) {
+-	case W5100:
+-		ops = &w5100_spi_ops;
+-		priv_size = 0;
+-		break;
+-	case W5200:
+-		ops = &w5200_ops;
+-		priv_size = sizeof(struct w5200_spi_priv);
+-		break;
+-	case W5500:
+-		ops = &w5500_ops;
+-		priv_size = sizeof(struct w5500_spi_priv);
+-		break;
+-	default:
+-		return -EINVAL;
+-	}
++	pdata = (struct w5100_platform_data *)of_id->data;
++
++	ops = pdata->ops;
++	priv_size = pdata->priv_size;
+ 
+ 	return w5100_probe(&spi->dev, ops, priv_size, mac, spi->irq, -EINVAL);
+ }
+@@ -442,14 +475,6 @@ static int w5100_spi_remove(struct spi_device *spi)
+ 	return w5100_remove(&spi->dev);
+ }
+ 
+-static const struct spi_device_id w5100_spi_ids[] = {
+-	{ "w5100", W5100 },
+-	{ "w5200", W5200 },
+-	{ "w5500", W5500 },
+-	{}
+-};
+-MODULE_DEVICE_TABLE(spi, w5100_spi_ids);
+-
+ static struct spi_driver w5100_spi_driver = {
+ 	.driver		= {
+ 		.name	= "w5100",
+diff --git a/drivers/net/ethernet/wiznet/w5100.h b/drivers/net/ethernet/wiznet/w5100.h
+index 17983a3..a956c06 100644
+--- a/drivers/net/ethernet/wiznet/w5100.h
++++ b/drivers/net/ethernet/wiznet/w5100.h
+@@ -27,6 +27,11 @@ struct w5100_ops {
+ 	int (*init)(struct net_device *ndev);
+ };
+ 
++struct w5100_platform_data {
++	const struct w5100_ops *ops;
++	int priv_size;
++};
++
+ void *w5100_ops_priv(const struct net_device *ndev);
+ 
+ int w5100_probe(struct device *dev, const struct w5100_ops *ops,
+-- 
+2.7.4
+

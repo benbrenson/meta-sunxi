@@ -1,0 +1,26 @@
+From f67afce486d7b08ae3816d387ac157c5efd52256 Mon Sep 17 00:00:00 2001
+From: Benedikt Niedermayr <Benedikt.Niedermayr@mixed-mode.de>
+Date: Sat, 29 Apr 2017 22:04:14 +0200
+Subject: [PATCH 2/5] can: mcp251x Fixed delay after hw reset.
+
+Some integrated mcp251x chips requiring more than 5ms startup time.
+---
+ drivers/net/can/spi/mcp251x.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/net/can/spi/mcp251x.c b/drivers/net/can/spi/mcp251x.c
+index f3f05fe..b7c4ee7 100644
+--- a/drivers/net/can/spi/mcp251x.c
++++ b/drivers/net/can/spi/mcp251x.c
+@@ -215,7 +215,7 @@
+
+ #define TX_ECHO_SKB_MAX	1
+
+-#define MCP251X_OST_DELAY_MS	(5)
++#define MCP251X_OST_DELAY_MS	(15)
+
+ #define DEVICE_NAME "mcp251x"
+
+--
+2.7.4
+

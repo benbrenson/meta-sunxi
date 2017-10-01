@@ -9,8 +9,8 @@ inherit dpkg debianize u-boot
 # to debian control file
 DEB_DEPENDS += " device-tree-compiler "
 
-SRCREV = "${BRANCH}"
-BRANCH = "h3_siemens"
+SRCREV = "5877d8f398de26617be6f1f57bc30c49e9f90ebb"
+BRANCH = "master"
 
 SECTION  = "admin"
 PRIORITY = "extra"
@@ -21,11 +21,12 @@ BOOTSCRIPT ?= "boot.scr"
 
 SRC_DIR="git"
 SRC_URI += " \
-         ${URL};protocol=https;branch=${BRANCH} \
+         ${URL};branch=${BRANCH} \
          file://defconfig \
          file://debian \
          file://overlays.txt \
          file://${BOOTSCRIPT_SRC} \
+         file://0001-Fixed-silent-return-after-broken-fdt-apply-command.patch \
          "
 
 

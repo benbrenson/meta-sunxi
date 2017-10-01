@@ -1,0 +1,125 @@
+From 7b76d735575af95276eb97a96cd31486e5fd17b0 Mon Sep 17 00:00:00 2001
+From: Benedikt Niedermayr <Benedikt.Niedermayr@mixed-mode.de>
+Date: Thu, 6 Apr 2017 16:05:10 +0200
+Subject: [PATCH 1/5] Added support for compiling device tree overlays. The
+ kernels buildsystem is not capable of compiling device tree overlays. So the
+ buildsystem was modified to do this now. In order to comile device tree
+ overlays, the device tree compiler has to patched, to use the '-@' option.
+ Both base device tree and dt-overlay has to be compiled with -@, so the base
+ device tree contains phandle values for all dt-nodes (libfdt will look for
+ them).
+
+---
+ arch/arm/Makefile          |  3 +++
+ arch/arm/boot/.gitignore   |  1 +
+ arch/arm/boot/dts/Makefile |  3 +++
+ scripts/Makefile.dtbinst   | 10 ++++++++--
+ scripts/Makefile.lib       | 17 ++++++++++++++++-
+ 5 files changed, 31 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/Makefile b/arch/arm/Makefile
+index 47d3a1a..b8e0360 100644
+--- a/arch/arm/Makefile
++++ b/arch/arm/Makefile
+@@ -340,6 +340,9 @@ $(INSTALL_TARGETS):
+ %.dtb: | scripts
+ 	$(Q)$(MAKE) $(build)=$(boot)/dts MACHINE=$(MACHINE) $(boot)/dts/$@
+ 
++%.dtbo: | scripts
++	$(Q)$(MAKE) $(build)=$(boot)/dts MACHINE=$(MACHINE) $(boot)/dts/overlays/$@
++
+ PHONY += dtbs dtbs_install
+ 
+ dtbs: prepare scripts
+diff --git a/arch/arm/boot/.gitignore b/arch/arm/boot/.gitignore
+index 3c79f85..882d613 100644
+--- a/arch/arm/boot/.gitignore
++++ b/arch/arm/boot/.gitignore
+@@ -4,3 +4,4 @@ xipImage
+ bootpImage
+ uImage
+ *.dtb
++*.dtbo
+diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
+index 4b17f35..bd66e619 100644
+--- a/arch/arm/boot/dts/Makefile
++++ b/arch/arm/boot/dts/Makefile
+@@ -1063,3 +1063,6 @@ dtb-$(CONFIG_OF_ALL_DTBS) := $(patsubst $(dtstree)/%.dts,%.dtb, $(wildcard $(dts
+ 
+ always		:= $(dtb-y)
+ clean-files	:= *.dtb
++
++subdir-y	:= overlays
++dts-dirs    += overlays
+\ No newline at end of file
+diff --git a/scripts/Makefile.dtbinst b/scripts/Makefile.dtbinst
+index 34614a4..eaad5c1 100644
+--- a/scripts/Makefile.dtbinst
++++ b/scripts/Makefile.dtbinst
+@@ -22,6 +22,7 @@ include $(src)/Makefile
+ 
+ dtbinst-files	:= $(dtb-y)
+ dtbinst-dirs	:= $(dts-dirs)
++dtboinst-files	:= $(dtbo-y)
+ 
+ # Helper targets for Installing DTBs into the boot directory
+ quiet_cmd_dtb_install =	INSTALL $<
+@@ -29,13 +30,18 @@ quiet_cmd_dtb_install =	INSTALL $<
+ 
+ install-dir = $(patsubst $(dtbinst-root)%,$(INSTALL_DTBS_PATH)%,$(obj))
+ 
++$(dtbinst-files) $(dtbinst-dirs) $(dtboinst-files): | __dtbs_install_prep
++
+ $(dtbinst-files): %.dtb: $(obj)/%.dtb
+ 	$(call cmd,dtb_install,$(install-dir))
+ 
++$(dtboinst-files): %.dtbo: $(obj)/%.dtbo
++	$(call cmd,dtb_install,$(install-dir))
++
+ $(dtbinst-dirs):
+ 	$(Q)$(MAKE) $(dtbinst)=$(obj)/$@
+ 
+-PHONY += $(dtbinst-files) $(dtbinst-dirs)
+-__dtbs_install: $(dtbinst-files) $(dtbinst-dirs)
++PHONY += $(dtbinst-files) $(dtbinst-dirs) $(dtboinst-files)
++__dtbs_install: $(dtbinst-files) $(dtbinst-dirs) $(dtboinst-files)
+ 
+ .PHONY: $(PHONY)
+diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
+index 58c05e5..61f463b 100644
+--- a/scripts/Makefile.lib
++++ b/scripts/Makefile.lib
+@@ -276,7 +276,10 @@ cmd_gzip = (cat $(filter-out FORCE,$^) | gzip -n -f -9 > $@) || \
+ 
+ # DTC
+ # ---------------------------------------------------------------------------
+-DTC ?= $(objtree)/scripts/dtc/dtc
++
++# We need fixups so add '-@' option
++# NOTE: dtc has to be '-@' capable!
++DTC ?= $(objtree)/scripts/dtc/dtc -@
+ 
+ # Disable noisy checks by default
+ ifeq ($(KBUILD_ENABLE_EXTRA_GCC_CHECKS),)
+@@ -324,6 +327,18 @@ cmd_dtc = mkdir -p $(dir ${dtc-tmp}) ; \
+ $(obj)/%.dtb: $(src)/%.dts FORCE
+ 	$(call if_changed_dep,dtc)
+ 
++quiet_cmd_dtco = DTCO    $@
++cmd_dtco = mkdir -p $(dir ${dtc-tmp}) ; \
++	$(CPP) $(dtc_cpp_flags) -x assembler-with-cpp -o $(dtc-tmp) $< ; \
++	$(DTC) -O dtb -o $@ -b 0 \
++		-i $(dir $<) $(DTC_FLAGS) \
++		-d $(depfile).dtc.tmp $(dtc-tmp) ; \
++	cat $(depfile).pre.tmp $(depfile).dtc.tmp > $(depfile)
++
++
++$(obj)/%.dtbo: $(src)/%.dts FORCE
++	$(call if_changed_dep,dtco)
++
+ dtc-tmp = $(subst $(comma),_,$(dot-target).dts.tmp)
+ 
+ # Bzip2
+-- 
+2.7.4
+

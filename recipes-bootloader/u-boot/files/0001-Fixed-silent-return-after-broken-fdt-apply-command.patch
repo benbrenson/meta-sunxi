@@ -1,0 +1,194 @@
+From 08933c6b2fbdc8e07f3f158dba4a2644bbae0b5e Mon Sep 17 00:00:00 2001
+From: Benedikt Niedermayr <Benedikt.Niedermayr@mixed-mode.de>
+Date: Thu, 27 Apr 2017 17:06:29 +0200
+Subject: [PATCH] Fixed silent return after broken fdt apply command.
+
+We need some debug messages here, otherwise it is very hard to detect errors here.
+---
+ cmd/fdt.c                | 37 ++++++++++++++++++++-----------------
+ lib/libfdt/fdt_overlay.c | 37 +++++++++++++++++++++++--------------
+ 2 files changed, 43 insertions(+), 31 deletions(-)
+
+diff --git a/cmd/fdt.c b/cmd/fdt.c
+index 95dd673..d5583ac 100644
+--- a/cmd/fdt.c
++++ b/cmd/fdt.c
+@@ -58,7 +58,7 @@ static int fdt_value_setenv(const void *nodep, int len, const char *var)
+ 	else if (len == 4) {
+ 		char buf[11];
+ 
+-		sprintf(buf, "0x%08X", fdt32_to_cpu(*(fdt32_t *)nodep));
++		sprintf(buf, "0x%08X", *(uint32_t *)nodep);
+ 		setenv(var, buf);
+ 	} else if (len%4 == 0 && len <= 20) {
+ 		/* Needed to print things like sha1 hashes. */
+@@ -206,17 +206,7 @@ static int do_fdt(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+ 			return 1;
+ 		}
+ 		working_fdt = newaddr;
+-#ifdef CONFIG_OF_SYSTEM_SETUP
+-	/* Call the board-specific fixup routine */
+-	} else if (strncmp(argv[1], "sys", 3) == 0) {
+-		int err = ft_system_setup(working_fdt, gd->bd);
+ 
+-		if (err) {
+-			printf("Failed to add system information to FDT: %s\n",
+-			       fdt_strerror(err));
+-			return CMD_RET_FAILURE;
+-		}
+-#endif
+ 	/*
+ 	 * Make a new node
+ 	 */
+@@ -587,6 +577,18 @@ static int do_fdt(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+ 		}
+ 	}
+ #endif
++#ifdef CONFIG_OF_SYSTEM_SETUP
++	/* Call the board-specific fixup routine */
++	else if (strncmp(argv[1], "sys", 3) == 0) {
++		int err = ft_system_setup(working_fdt, gd->bd);
++
++		if (err) {
++			printf("Failed to add system information to FDT: %s\n",
++			       fdt_strerror(err));
++			return CMD_RET_FAILURE;
++		}
++	}
++#endif
+ 	/* Create a chosen node */
+ 	else if (strncmp(argv[1], "cho", 3) == 0) {
+ 		unsigned long initrd_start = 0, initrd_end = 0;
+@@ -641,8 +643,8 @@ static int do_fdt(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+ 	/* apply an overlay */
+ 	else if (strncmp(argv[1], "ap", 2) == 0) {
+ 		unsigned long addr;
+-		struct fdt_header *blob;
+ 		int ret;
++		struct fdt_header *blob;
+ 
+ 		if (argc != 3)
+ 			return CMD_RET_USAGE;
+@@ -652,12 +654,13 @@ static int do_fdt(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+ 
+ 		addr = simple_strtoul(argv[2], NULL, 16);
+ 		blob = map_sysmem(addr, 0);
+-		if (!fdt_valid(&blob))
++		if (!fdt_valid(&blob)){
++			printf("Error fdt is not valid!\n");
+ 			return CMD_RET_FAILURE;
+-
++		}
+ 		ret = fdt_overlay_apply(working_fdt, blob);
+-		if (ret) {
+-			printf("fdt_overlay_apply(): %s\n", fdt_strerror(ret));
++		if (ret){
++			printf("Error applying dtbo: %d!\n", ret);
+ 			return CMD_RET_FAILURE;
+ 		}
+ 	}
+@@ -768,7 +771,7 @@ static int fdt_parse_prop(char * const *newval, int count, char *data, int *len)
+ 
+ 			cp = newp;
+ 			tmp = simple_strtoul(cp, &newp, 0);
+-			*(fdt32_t *)data = cpu_to_fdt32(tmp);
++			*(__be32 *)data = __cpu_to_be32(tmp);
+ 			data  += 4;
+ 			*len += 4;
+ 
+diff --git a/lib/libfdt/fdt_overlay.c b/lib/libfdt/fdt_overlay.c
+index 56cb70e..1bf5c63 100644
+--- a/lib/libfdt/fdt_overlay.c
++++ b/lib/libfdt/fdt_overlay.c
+@@ -2,7 +2,7 @@
+ 
+ #include <fdt.h>
+ #include <libfdt.h>
+-
++#include <common.h>
+ #include "libfdt_internal.h"
+ 
+ /**
+@@ -359,9 +359,6 @@ static int overlay_fixup_one_phandle(void *fdt, void *fdto,
+ 	int symbol_off, fixup_off;
+ 	int prop_len;
+ 
+-	if (symbols_off < 0)
+-		return symbols_off;
+-
+ 	symbol_path = fdt_getprop(fdt, symbols_off, label,
+ 				  &prop_len);
+ 	if (!symbol_path)
+@@ -495,9 +492,7 @@ static int overlay_fixup_phandles(void *fdt, void *fdto)
+ 
+ 	/* We can have overlays without any fixups */
+ 	fixups_off = fdt_path_offset(fdto, "/__fixups__");
+-	if (fixups_off == -FDT_ERR_NOTFOUND)
+-		return 0; /* nothing to do */
+-	if (fixups_off < 0)
++	if ((fixups_off < 0 && (fixups_off != -FDT_ERR_NOTFOUND)))
+ 		return fixups_off;
+ 
+ 	/* And base DTs without symbols */
+@@ -614,16 +609,22 @@ static int overlay_merge(void *fdt, void *fdto)
+ 		if (overlay == -FDT_ERR_NOTFOUND)
+ 			continue;
+ 
+-		if (overlay < 0)
++		if (overlay < 0){
++			printf("Error overlay < 0 \n");
+ 			return overlay;
++		}
+ 
+ 		target = overlay_get_target(fdt, fdto, fragment);
+-		if (target < 0)
++		if (target < 0){
++			printf("Error overlay_get_target: %d \n", target);
+ 			return target;
++		}
+ 
+ 		ret = overlay_apply_node(fdt, target, fdto, overlay);
+-		if (ret)
++		if (ret){
++			printf("Error overlay_apply_node: %d \n", ret);
+ 			return ret;
++		}
+ 	}
+ 
+ 	return 0;
+@@ -638,20 +639,28 @@ int fdt_overlay_apply(void *fdt, void *fdto)
+ 	FDT_CHECK_HEADER(fdto);
+ 
+ 	ret = overlay_adjust_local_phandles(fdto, delta);
+-	if (ret)
++	if (ret){
++		printf("Error overlay_adjust_local_phandles\n");
+ 		goto err;
++	}
+ 
+ 	ret = overlay_update_local_references(fdto, delta);
+-	if (ret)
++	if (ret){
++		printf("Error overlay_update_local_references\n");
+ 		goto err;
++	}
+ 
+ 	ret = overlay_fixup_phandles(fdt, fdto);
+-	if (ret)
++	if (ret){
++		printf("Error overlay_fixup_phandles\n");
+ 		goto err;
++	}
+ 
+ 	ret = overlay_merge(fdt, fdto);
+-	if (ret)
++	if (ret){
++		printf("Error overlay_merge\n");
+ 		goto err;
++	}
+ 
+ 	/*
+ 	 * The overlay has been damaged, erase its magic.
+-- 
+2.7.4
+

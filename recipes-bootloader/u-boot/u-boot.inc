@@ -1,1 +1,1 @@
-URL="git://git.pixel-group.de/siemens-ct/Siemens_CT_REE-u-boot.git"
+URL="git://git.denx.de/u-boot.git"
