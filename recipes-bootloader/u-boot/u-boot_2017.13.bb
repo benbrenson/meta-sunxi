@@ -21,7 +21,7 @@ BOOTSCRIPT ?= "boot.scr"
 
 SRC_DIR="git"
 SRC_URI += " \
-         ${URL};branch=${BRANCH} \
+         ${URL};branch=${BRANCH};protocol=https \
          file://defconfig \
          file://debian \
          file://overlays.txt \
