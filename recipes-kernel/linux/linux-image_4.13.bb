@@ -15,7 +15,7 @@ SRCREV = "ef954844c7ace62f773f4f23e28d2d915adc419f"
 
 SRC_DIR = "git"
 SRC_URI += " \
-        ${URL};branch=${BRANCH} \
+        ${URL};branch=${BRANCH};protocol=https \
         file://${MACHINE}_defconfig \
         file://dts \
         file://debian \
