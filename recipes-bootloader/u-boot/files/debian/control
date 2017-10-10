@@ -14,5 +14,5 @@ Depends: ##RDEPENDS##
 
 Package: libubootenv
 Architecture: ##DEB_ARCH##
-Description: test
+Description: Library for accessing and manipulating the uboot environment.
 Depends: ${shlibs:Depends}, ${misc:Depends}
