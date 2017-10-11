@@ -34,6 +34,12 @@ DTBOS_LOAD    ?= ""
 DTBO_DEST_DIR ?= "boot/dts/overlays"
 
 
+do_copy_device_tree() {
+    cp -r ${EXTRACTDIR}/dts ${S}/arch/${TARGET_ARCH}/boot
+}
+do_copy_defconfig[postfuncs] += "do_copy_device_tree"
+
+
 generate_postinst() {
     sed -i 's|##KVERSION##|${FIX_KVERSION}|' ${EXTRACTDIR}/debian/postinst
 }
