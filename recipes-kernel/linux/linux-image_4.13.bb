@@ -17,7 +17,9 @@ SRC_DIR = "git"
 SRC_URI += " \
         ${URL};branch=${BRANCH};protocol=https \
         file://${MACHINE}_defconfig \
-        file://dts \
+        file://dts/sun8i-h3-nanopi.dtsi \
+        file://dts/sun8i-h3-nanopi-neo.dts \
+        file://dts/sun8i-h3-nanopi-neo-air.dts \
         file://debian \
         file://0001-Added-support-for-compiling-device-tree-overlays.patch \
         file://0002-can-mcp251x-Fixed-delay-after-hw-reset.patch \
@@ -35,7 +37,10 @@ DTBO_DEST_DIR ?= "boot/dts/overlays"
 
 
 do_copy_device_tree() {
-    cp -r ${EXTRACTDIR}/dts ${S}/arch/${TARGET_ARCH}/boot
+    cp  ${EXTRACTDIR}/dts/sun8i-h3-nanopi.dtsi \
+        ${EXTRACTDIR}/dts/sun8i-h3-nanopi-neo.dts \
+        ${EXTRACTDIR}/dts/sun8i-h3-nanopi-neo-air.dts \
+        ${S}/arch/${TARGET_ARCH}/boot/dts
 }
 do_copy_defconfig[postfuncs] += "do_copy_device_tree"
 
