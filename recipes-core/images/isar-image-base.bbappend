@@ -1,12 +1,11 @@
 ADMIN_PACKAGES_append_nanopi-neo-air = "wpasupplicant"
 DEV_PACKAGES_append_nanopi-neo-air = "wireless-tools"
 
-BOOTPART = "mmcblk0p1"
-BOOTPART_FSTYPE = "vfat"
+BOOTPART = "${base_devdir}/mmcblk0p${ROOTP_PRIM_NUM}"
 
 # Post Rootfs: Add mmc to fstab
 do_post_fstab() {
-    echo "/dev/${BOOTPART}   /boot       ${BOOTPART_FSTYPE}        defaults        1   1" >> /etc/fstab
+    echo "${BOOTPART}   /boot       ${BOOTDEVICE_FSTYPE}        defaults        1   1" >> /etc/fstab
 }
 addtask do_post_fstab
 do_post_fstab[stamp-extra-info] = "${MACHINE}.chroot"
