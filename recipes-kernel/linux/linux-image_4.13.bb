@@ -44,13 +44,6 @@ do_copy_device_tree() {
 }
 do_copy_defconfig[postfuncs] += "do_copy_device_tree"
 
-
-generate_postinst() {
-    sed -i 's|##KVERSION##|${FIX_KVERSION}|' ${EXTRACTDIR}/debian/postinst
-}
-do_unpack[postfuncs] += "generate_postinst"
-
-
 # Overwrite the standart dtc with the overlay capable one.
 debianize_build_prepend() {
 	${MAKE} scripts
