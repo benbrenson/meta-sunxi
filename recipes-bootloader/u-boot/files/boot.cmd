@@ -48,9 +48,9 @@ else
 
     setenv bootdev_num ##BOOT_DEVICE_NUM##:##BOOTP_PRIM_NUM##
     setenv bootdev ##BOOT_DEVICE_NAME##
-    setenv rootdevice ##ROOTDEV_PRIM##
-    setenv rootdevice_prim ##ROOTDEV_PRIM##
-    setenv rootdevice_sec ##ROOTDEV_SEC##
+    setenv rootdevice ##CMDLINE_ROOTDEV_PRIM##
+    setenv rootdevice_prim ##CMDLINE_ROOTDEV_PRIM##
+    setenv rootdevice_sec ##CMDLINE_ROOTDEV_SEC##
 
     setenv bootargs_base ##KERNEL_CMDLINE##
     setenv bootargs ${bootargs_base} root=${rootdevice}
