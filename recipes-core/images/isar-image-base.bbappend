@@ -1,7 +1,7 @@
 ADMIN_PACKAGES_append_nanopi-neo-air = "wpasupplicant"
 DEV_PACKAGES_append_nanopi-neo-air = "wireless-tools"
 
-BOOTPART = "${base_devdir}/mmcblk0p${ROOTP_PRIM_NUM}"
+BOOTPART = "${base_devdir}/${BOOT_DEVICE_LINUX}${BOOTP_PRIM_NUM}"
 
 # Post Rootfs: Add mmc to fstab
 do_post_fstab() {
