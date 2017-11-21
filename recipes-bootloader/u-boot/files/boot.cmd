@@ -10,11 +10,17 @@ if printenv ustate; then
     elif test ${ustate} = 1; then
         echo "Update was performed. Switching rootfs partitions."
 
-        # Switch rootfs partitions and boot partitions
-        setenv rootdevice ${rootdevice_sec}
-        setenv rootdevice_sec ${rootdevice_prim}
-        setenv rootdevice_prim ${rootdevice}
-        setenv bootargs ${bootargs_base} root=${rootdevice}
+        # Switch rootfs partitions
+        setenv cmdline_rootdev ${cmdline_rootdev_sec}
+        setenv cmdline_rootdev_sec ${cmdline_rootdev_prim}
+        setenv cmdline_rootdev_prim ${cmdline_rootdev}
+
+        # Switch boot partitions
+        setenv bootpart ${bootpart_sec_num}
+        setenv bootpart_sec_num ${bootpart_prim_num}
+        setenv bootpart_prim_num ${bootpart}
+
+        setenv bootargs ${bootargs_base} root=${cmdline_rootdev}
 
         # Update was performed set ustate 2 so only rootfs will set it
         # to 0 again.
@@ -24,15 +30,19 @@ if printenv ustate; then
     elif test ${ustate} = 2; then
         # Oh, oh... something went wrong.
         # Rootfs service did not reset the ustate.
-        # So switch rootfs partitions and set ustate to 3, so
+        # So switch rootfs and boot partitions back and set ustate to 3, so
         # userspace will handle this case.
 
         echo "Something went wrong while performing the update. Switching rootfs partitions back."
-        setenv rootdevice ${rootdevice_sec}
-        setenv rootdevice_sec ${rootdevice_prim}
-        setenv rootdevice_prim ${rootdevice}
+        setenv cmdline_rootdev ${cmdline_rootdev_sec}
+        setenv cmdline_rootdev_sec ${cmdline_rootdev_prim}
+        setenv cmdline_rootdev_prim ${cmdline_rootdev}
 
-        setenv bootargs ${bootargs_base} root=${rootdevice}
+        setenv bootpart ${bootpart_sec_num}
+        setenv bootpart_sec_num ${bootpart_prim_num}
+        setenv bootpart_prim_num ${bootpart}
+
+        setenv bootargs ${bootargs_base} root=${cmdline_rootdev}
         setenv ustate 3
         saveenv
 
@@ -45,39 +55,39 @@ else
     echo "First Boot of device. Initialize environment."
     setenv ustate 0
 
-
-    setenv bootdev_num ##BOOT_DEVICE_NUM##:##BOOTP_PRIM_NUM##
     setenv bootdev ##BOOT_DEVICE_NAME##
-    setenv rootdevice ##CMDLINE_ROOTDEV_PRIM##
-    setenv rootdevice_prim ##CMDLINE_ROOTDEV_PRIM##
-    setenv rootdevice_sec ##CMDLINE_ROOTDEV_SEC##
+    setenv bootdev_num ##BOOT_DEVICE_NUM##
+
+    setenv bootpart ##BOOTP_PRIM_NUM##
+    setenv bootpart_prim_num ##BOOTP_PRIM_NUM##
+    setenv bootpart_sec_num ##BOOTP_SEC_NUM##
+
+    setenv cmdline_rootdev ##CMDLINE_ROOTDEV_PRIM##
+    setenv cmdline_rootdev_prim ##CMDLINE_ROOTDEV_PRIM##
+    setenv cmdline_rootdev_sec ##CMDLINE_ROOTDEV_SEC##
 
     setenv bootargs_base ##KERNEL_CMDLINE##
-    setenv bootargs ${bootargs_base} root=${rootdevice}
+    setenv bootargs ${bootargs_base} root=${cmdline_rootdev}
     setenv fdtfile ##DTBS##
     saveenv
 fi
 
 
-
-#load ${bootdev} ${bootdev_num} ${ramdisk_addr_r} cmdline.txt
-#env import -t ${ramdisk_addr_r} ${envfile_max_size}
-
-load ${bootdev} ${bootdev_num} ${ramdisk_addr_r} overlays.txt
+load ${bootdev} ${bootdev_num}:${bootpart} ${ramdisk_addr_r} /boot/overlays.txt
 env import -t ${ramdisk_addr_r} ${envfile_max_size}
 
 echo Kernel commandline ${bootargs}
 
-load ${bootdev} ${bootdev_num} ${kernel_addr_r} uImage
+load ${bootdev} ${bootdev_num}:${bootpart} ${kernel_addr_r} /boot/uImage
 
-load ${bootdev} ${bootdev_num} ${fdt_addr_r} dts/${fdtfile}
+load ${bootdev} ${bootdev_num}:${bootpart} ${fdt_addr_r} /boot/dts/${fdtfile}
 fdt addr ${fdt_addr_r}
 
 # Add 100K size for possible overlay extension
 fdt resize 100000
 
 for overlay_file in ${overlays}; do
-	if load ${bootdev} 0:1 ${dtbo_addr} dts/overlays/${overlay_file}; then
+	if load ${bootdev} ${bootdev_num}:${bootpart} ${dtbo_addr} /boot/dts/overlays/${overlay_file}; then
 		echo "Applying device tree overlay ${overlay_file}"
 		fdt apply ${dtbo_addr} || setenv overlay_error "true"
 	fi
