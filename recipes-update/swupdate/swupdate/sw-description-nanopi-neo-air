@@ -1,0 +1,30 @@
+software =
+{
+    version = "0.1";
+
+    hardware-compatibility = [ "0.1" ];
+    /* differentiate running image modes/sets */
+
+    stable:
+    {
+        main:
+        {
+            images: (
+            {
+                filename = "isar-image-base.ext4";
+                device = "/dev/mmcblk0p2";
+            }
+            );
+        };
+
+        alt:
+        {
+            images: (
+            {
+                filename = "isar-image-base.ext4";
+                device = "/dev/mmcblk0p3";
+            }
+            );
+        };
+    };
+}
