@@ -5,8 +5,9 @@ LICENSE = "gpl2"
 include u-boot.inc
 inherit dpkg debianize u-boot
 
-# Add build dependencies installed via apt-get
-# to debian control file
+PROVIDES += "libubootenv"
+PROVIDES_class-cross += "libubootenv-cross"
+
 DEB_DEPENDS += " device-tree-compiler "
 
 SRCREV = "5877d8f398de26617be6f1f57bc30c49e9f90ebb"
