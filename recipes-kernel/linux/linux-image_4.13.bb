@@ -28,14 +28,10 @@ SRC_URI += " \
         file://0005-net-Added-device-tree-support-for-w5100-driver.patch \
         file://0006-can-mcp251x-Fixed-deadlock-for-free_irq-while-irq-wa.patch \
         "
-
 SRC_URI_append_nanopi-neo-air = "file://firmware"
 
-DTBO_SRC_DIR  ?= "arch/${TARGET_ARCH}/boot/dts/overlays"
-DTBOS         ?= ""
-DTBOS_LOAD    ?= ""
-DTBO_DEST_DIR ?= "boot/dts/overlays"
-
+DTBO_SRC_DIR  = "arch/${TARGET_ARCH}/boot/dts/overlays"
+DTBO_DEST_DIR = "boot/dts/overlays"
 
 do_copy_device_tree() {
     cp  ${EXTRACTDIR}/dts/sun8i-h3-nanopi.dtsi \
