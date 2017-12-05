@@ -1,5 +1,7 @@
-ADMIN_PACKAGES_append_nanopi-neo-air = "wpasupplicant"
-DEV_PACKAGES_append_nanopi-neo-air = "wireless-tools"
+ADMIN_PACKAGES_append_nanopi-neo-air = " wpasupplicant "
+DEV_PACKAGES_append_nanopi-neo-air = " wireless-tools "
+
+IMAGE_PREINSTALL_append_nanopi-neo-air += " isc-dhcp-client "
 
 BOOTPART = "${base_devdir}/${BOOT_DEVICE_LINUX}${RECOVERY_BOOTPART_NUM}"
 BOOTSCIPT_DIR = "/boot/recovery"
