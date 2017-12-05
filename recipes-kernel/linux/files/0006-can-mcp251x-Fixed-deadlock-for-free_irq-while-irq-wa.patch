@@ -1,0 +1,47 @@
+From 7de9ccc475194b718e95da6e5d59f4c1ac796c80 Mon Sep 17 00:00:00 2001
+From: Benedikt Niedermayr <Benedikt.Niedermayr@mixed-mode.de>
+Date: Sat, 29 Apr 2017 21:55:38 +0200
+Subject: [PATCH 09/13] can: mcp251x Fixed deadlock for free_irq() while irq
+ was already fired.
+
+Since free_irq() is called after problems in mcp251x_open() occured and after the
+irq was requested it may happen, that the irq waits for releasing the lock undefinetly,
+because mcp251x_open() already aquired it.
+---
+ drivers/net/can/spi/mcp251x.c | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/net/can/spi/mcp251x.c b/drivers/net/can/spi/mcp251x.c
+index f3f05fe..987f428 100644
+--- a/drivers/net/can/spi/mcp251x.c
++++ b/drivers/net/can/spi/mcp251x.c
+@@ -640,7 +640,7 @@ static int mcp251x_hw_reset(struct spi_device *spi)
+ 
+ 	/* Wait for oscillator startup timer after reset */
+ 	mdelay(MCP251X_OST_DELAY_MS);
+-	
++
+ 	reg = mcp251x_read_reg(spi, CANSTAT);
+ 	if ((reg & CANCTRL_REQOP_MASK) != CANCTRL_REQOP_CONF)
+ 		return -ENODEV;
+@@ -684,6 +684,17 @@ static void mcp251x_open_clean(struct net_device *net)
+ 	struct mcp251x_priv *priv = netdev_priv(net);
+ 	struct spi_device *spi = priv->spi;
+ 
++	/* Unlock the mcp_lock before freeing the irq,
++	 * since maybe irq was already fired
++	 * and waits for unlocking, but this will never happen,
++	 * since free_irq waits until irq is done
++	 * (only after mcp_lock was released...)
++	 * Before unlocking the mutex first call trylock to ensure
++	 * unlocking a locked mutex.
++	 */
++	mutex_trylock(&priv->mcp_lock);
++	mutex_unlock(&priv->mcp_lock);
++
+ 	free_irq(spi->irq, priv);
+ 	mcp251x_hw_sleep(spi);
+ 	mcp251x_power_enable(priv->transceiver, 0);
+-- 
+2.7.4
+

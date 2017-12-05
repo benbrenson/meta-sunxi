@@ -1,4 +1,4 @@
-DESCRIPTION ?= "Mainline linux kernel support for the nanopi."
+DESCRIPTION_nanopi ?= "Mainline linux kernel support for the nanopi."
 
 DESCRIPTION_nanopi-neo-air = "Mainline linux kernel support for the nanopi-neo-air."
 
@@ -26,6 +26,7 @@ SRC_URI += " \
         file://0003-spi-sun6i-Added-support-for-gpio-chipselect.patch \
         file://0004-spi-sun6i-Fixed-maximum-transfer-size-of-64bit.patch \
         file://0005-net-Added-device-tree-support-for-w5100-driver.patch \
+        file://0006-can-mcp251x-Fixed-deadlock-for-free_irq-while-irq-wa.patch \
         "
 
 SRC_URI_append_nanopi-neo-air = "file://firmware"
@@ -56,10 +57,10 @@ debianize_install_append() {
 }
 
 # Install required firmware binary and nvram config file for
-# ap6212 wireless chipset
+# ap6212 (BCM43430) wireless chipset
 debianize_install_append_nanopi-neo-air() {
 	install -m 644 -d debian/${BPN}/lib/firmware/brcm
-	install -m 644 ${PP}/firmware/brcmfmac43430-sdio.bin debian/${BPN}/lib/firmware/brcm
+	install -m 644 ${PP}/firmware/brcmfmac43430-sdio.bin.7.45.77.0.ucode1043.2054 debian/${BPN}/lib/firmware/brcm/brcmfmac43430-sdio.bin
 	install -m 644 ${PP}/firmware/brcmfmac43430-sdio.txt debian/${BPN}/lib/firmware/brcm
 }
 
