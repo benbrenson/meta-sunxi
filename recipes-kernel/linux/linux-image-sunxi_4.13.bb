@@ -5,7 +5,7 @@ DESCRIPTION_nanopi-neo-air = "Mainline linux kernel support for the nanopi-neo-a
 
 # We will cross compile the kernel, because qemu has poor performance.
 inherit debianize kernel
-DEPENDS_class-cross = "dtc-native"
+DEPENDS = "dtc-native"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-${PV}:"
 

@@ -3,10 +3,12 @@ but does not flash it to the bootmedia. This has to be done separately."
 LICENSE = "gpl2"
 
 include u-boot.inc
-inherit dpkg debianize u-boot
+inherit debianize u-boot dpkg
 
-PROVIDES += "libubootenv"
-PROVIDES_class-cross += "libubootenv-cross"
+# Special case: Since uboot recipe in turn is selected by PREFERRED_PRODIVERS,
+# all debian binary packages of uboot have to set one common provider (which is usually ${PN} in other cases) and also
+# an unique provider.
+PROVIDES_append = " libubootenv-sunxi libubootenv "
 
 DEB_DEPENDS += " device-tree-compiler "
 
