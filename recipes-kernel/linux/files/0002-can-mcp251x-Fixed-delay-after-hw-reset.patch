@@ -17,7 +17,7 @@ index f3f05fe..b7c4ee7 100644
  #define TX_ECHO_SKB_MAX	1
 
 -#define MCP251X_OST_DELAY_MS	(5)
-+#define MCP251X_OST_DELAY_MS	(15)
++#define MCP251X_OST_DELAY_MS	(30)
 
  #define DEVICE_NAME "mcp251x"
 
