@@ -1,4 +1,4 @@
-DESCRIPTION_nanopi ?= "Mainline linux kernel support for the nanopi."
+DESCRIPTION_nanopi-neo = "Mainline linux kernel support for the nanopi."
 
 DESCRIPTION_nanopi-neo-air = "Mainline linux kernel support for the nanopi-neo-air."
 
