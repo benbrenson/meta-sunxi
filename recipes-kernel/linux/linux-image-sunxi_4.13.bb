@@ -34,10 +34,7 @@ DTBO_SRC_DIR  = "arch/${TARGET_ARCH}/boot/dts/overlays"
 DTBO_DEST_DIR = "boot/dts/overlays"
 
 do_copy_device_tree() {
-    cp  ${EXTRACTDIR}/dts/sun8i-h3-nanopi.dtsi \
-        ${EXTRACTDIR}/dts/sun8i-h3-nanopi-neo.dts \
-        ${EXTRACTDIR}/dts/sun8i-h3-nanopi-neo-air.dts \
-        ${S}/arch/${TARGET_ARCH}/boot/dts
+    cp -r ${EXTRACTDIR}/dts/* ${S}/arch/${TARGET_ARCH}/boot/dts
 }
 do_copy_defconfig[postfuncs] += "do_copy_device_tree"
 
