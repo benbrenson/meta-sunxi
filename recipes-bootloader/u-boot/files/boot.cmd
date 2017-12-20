@@ -33,7 +33,7 @@ if printenv ustate; then
         # So switch rootfs and boot partitions back and set ustate to 3, so
         # userspace will handle this case.
 
-        echo "Something went wrong while performing the update. Switching rootfs partitions back."
+        echo "SOMETHING WENT WRONG WHILE PERFORMING THE UPDATE. SWITCHING ROOTFS PARTITIONS BACK."
         setenv cmdline_rootdev ${cmdline_rootdev_sec}
         setenv cmdline_rootdev_sec ${cmdline_rootdev_prim}
         setenv cmdline_rootdev_prim ${cmdline_rootdev}
@@ -47,7 +47,7 @@ if printenv ustate; then
         saveenv
 
     else
-        echo "ustate has an abnormal value. Please check this!"
+        echo "USTATE HAS AN ABNORMAL VALUE. PLEASE CHECK THIS!"
     fi
 
 else
@@ -57,6 +57,8 @@ else
 
     setenv bootdev ##BOOT_DEVICE_NAME##
     setenv bootdev_num ##BOOT_DEVICE_NUM##
+
+    setenv recovery_part_num ##RECOVERY_BOOTPART_NUM##
 
     setenv bootpart ##BOOTP_PRIM_NUM##
     setenv bootpart_prim_num ##BOOTP_PRIM_NUM##
@@ -69,6 +71,18 @@ else
     setenv bootargs_base ##KERNEL_CMDLINE##
     setenv bootargs ${bootargs_base} root=${cmdline_rootdev}
     setenv fdtfile ##DTBS##
+
+    setenv boot_script "echo loading primary bootscript...; load ${devtype} ${bootdev_num}:${bootpart} ${scriptaddr} /boot/boot.scr; source ${scriptaddr}"
+    setenv recovery_boot_script "load ${devtype} ${bootdev_num}:${recovery_part_num} ${scriptaddr} /boot.scr; source ${scriptaddr}"
+    setenv set_recovery_mode "setenv recovery_boot 1; saveenv"
+    setenv unset_recovery_mode "setenv recovery_boot 0; saveenv"
+    run unset_recovery_mode
+
+    setenv mmc_boottargets "mmc_boot_primary mmc_boot_recovery"
+    setenv mmc_boot_primary "run unset_recovery_mode; run boot_script"
+    setenv mmc_boot_recovery "echo SCRIPT FAILED... starting recovery boot script; run set_recovery_mode; run recovery_boot_script"
+    setenv mmc_boot 'for i in ${mmc_boottargets}; do run ${i} ; done'
+
     saveenv
 fi
 
@@ -78,9 +92,15 @@ env import -t ${ramdisk_addr_r} ${envfile_max_size}
 
 echo Kernel commandline ${bootargs}
 
-load ${bootdev} ${bootdev_num}:${bootpart} ${kernel_addr_r} /boot/uImage
+if test "0" -eq ${recovery_boot} ; then
+    load ${bootdev} ${bootdev_num}:${bootpart} ${kernel_addr_r} /boot/uImage
+    load ${bootdev} ${bootdev_num}:${bootpart} ${fdt_addr_r} /boot/dts/${fdtfile}
+else
+    echo "LOADING KERNEL AND DEVICE TREE FROM RECOVERY PARTITION. SOMETHING WENT WRONG PLEASE CONTACT SUPPORT......"
+    load ${bootdev} ${bootdev_num}:${recovery_part_num} ${kernel_addr_r} /uImage
+    load ${bootdev} ${bootdev_num}:${recovery_part_num} ${fdt_addr_r} /${fdtfile}
+fi
 
-load ${bootdev} ${bootdev_num}:${bootpart} ${fdt_addr_r} /boot/dts/${fdtfile}
 fdt addr ${fdt_addr_r}
 
 # Add 100K size for possible overlay extension
