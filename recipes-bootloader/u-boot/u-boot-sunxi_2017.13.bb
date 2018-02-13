@@ -32,7 +32,7 @@ SRC_URI += " \
          file://0001-Fixed-silent-return-after-broken-fdt-apply-command.patch \
          "
 
-do_pre_install_append() {
+do_install_append() {
     install -m 0755 ${S}/${BOOT_IMG} ${DEPLOY_DIR_IMAGE}
     install -m 0755 ${S}/${BOOTSCRIPT} ${DEPLOY_DIR_IMAGE}
 }
