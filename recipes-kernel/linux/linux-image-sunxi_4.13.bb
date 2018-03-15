@@ -55,6 +55,9 @@ debianize_install_append_nanopi-neo-air() {
 	install -m 644 -d debian/${BPN}/lib/firmware/brcm
 	install -m 644 ${PP}/firmware/brcmfmac43430-sdio.bin.7.45.77.0.ucode1043.2054 debian/${BPN}/lib/firmware/brcm/brcmfmac43430-sdio.bin
 	install -m 644 ${PP}/firmware/brcmfmac43430-sdio.txt debian/${BPN}/lib/firmware/brcm
+
+    install -m 644 ${PP}/firmware/brcmfmac43430a0-sdio.bin debian/${BPN}/lib/firmware/brcm/
+    install -m 644 ${PP}/firmware/brcmfmac43430a0-sdio.txt debian/${BPN}/lib/firmware/brcm/
 }
 
 
